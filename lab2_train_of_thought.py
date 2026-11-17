@@ -95,7 +95,10 @@ class GPT:
             "gpt-4": {
                 "gpt-4": 8192,
                 "gpt-4-32k": 32768,
-            }
+            },
+            "gpt-4o-mini": {
+                "gpt-4o-mini": 128000,
+            },
         }
         return
 
@@ -174,7 +177,7 @@ class Game:
         self.output_dir = config.output_dir
         self.summary_file = ""
         self.gpt = GPT(config.model)
-        self.gpt4 = GPT("gpt-4")
+        self.gpt4 = GPT(config.model)
 
         self.user_prompt_to_text = {}
         self.max_saves = 4

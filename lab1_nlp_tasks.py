@@ -113,7 +113,10 @@ def get_specific_tokens_model(model, text_in, tokenizer, out_tokens=500):
         "gpt-4": {
             "gpt-4": 8192,
             "gpt-4-32k": 32768,
-        }
+        },
+        "gpt-4o-mini": {
+            "gpt-4o-mini": 128000,
+        },
     }
 
     in_token_list = tokenizer.encode(text_in)
@@ -127,7 +130,6 @@ def get_specific_tokens_model(model, text_in, tokenizer, out_tokens=500):
         candidate = ""
 
     return in_tokens, candidate
-
 
 def run_gpt(model, tokenizer, text_in, log_prefix):
     in_tokens, specific_tokens_model = get_specific_tokens_model(

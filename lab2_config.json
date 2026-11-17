@@ -1,5 +1,5 @@
 {
-    "model": "gpt-3.5-turbo",
+    "model": "gpt-4o-mini",
     "static_dir": ["corpora", "druid"],
     "state_dir": ["lab2_output", "state"],
     "output_dir": ["lab2_output"]

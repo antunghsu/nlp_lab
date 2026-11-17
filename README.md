@@ -20,7 +20,8 @@ Authors:
 - Operating system
   - OS-independent
 - System apps
-  - Python 3.9 (This is the development environment. Older versions may work.)
+  - [Anaconda](https://www.anaconda.com/download) or [Miniconda](https://docs.anaconda.com/miniconda/)
+  - Python 3.9 (created by conda below)
 - Python packages
   - See *requirements.txt*
 
@@ -29,16 +30,18 @@ Authors:
 cd /path/to/your/working/directory
 
 # Download this repository (If you don't have git, download and unzip the zip file instead.)
-git clone https://github.com/wkh1267/nlp_lab
+git clone https://github.com/antunghsu/nlp_lab
 cd nlp_lab
 
-# To check python version
+# Create and activate a conda environment with Python 3.9
+conda create -n nlp_lab python=3.9
+conda activate nlp_lab
+
+# To check python version (should be 3.9.x)
 python --version
 
-# Install with PyPI, or
+# Install the required packages
 pip install -r requirements.txt
-# Install with Conda (If you have Anaconda installed)
-conda install --file requirements.txt
 ```
 
 
@@ -225,6 +228,8 @@ Please submit your assignment on NTU COOL by providing a link to your GitHub rep
 ## LICENSE
 
 Copyright © 2023 [Li Peng-Hsuan 李朋軒](https://jacobvsdanniel.github.io) Lai Hong-Sheng 賴鴻昇
+
+Modified in 2026 by the course TA: updated the default model to `gpt-4o-mini` (`gpt-3.5-turbo` / `gpt-4` replaced), updated `tiktoken` to 0.7.0, and switched environment setup to conda. Original repository: <https://github.com/wkh1267/nlp_lab>.
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
