@@ -2,6 +2,22 @@
 
 **Hands-on First Experience of Natural Language Processing**
 
+## Homework 5
+
+- Release date: 2026/11/19
+- Due date: 2026/12/01 21:00
+  - Note: Lab 2.2 has a different due date: **2026/12/13 21:00**
+
+In this assignment, we hope that you will become familiar with prompts and be able to utilize the API of a Large Language Model to solve Natural Language Processing tasks.
+
+TA:
+- 李立庠 b12611001 [at] ntu.edu.tw
+- 許安彤 b12611005 [at] ntu.edu.tw
+
+Previously designed by 賴鴻昇. Original idea suggested by 李朋軒.
+
+tags: `1151iai`
+
 Authors:
 - [Li Peng-Hsuan 李朋軒](https://jacobvsdanniel.github.io) (jacobvsdanniel [at] gmail.com)
 - Lai Hong-Sheng 賴鴻昇 (b08611048 [at] ntu.edu.tw)
@@ -40,8 +56,10 @@ conda activate nlp_lab
 # To check python version (should be 3.9.x)
 python --version
 
-# Install the required packages
+# Install the required packages with PyPI, or
 pip install -r requirements.txt
+# Install with Conda
+conda install --file requirements.txt
 ```
 
 
@@ -175,7 +193,7 @@ Finish the game: 10 point.
 ### Submission for Lab 1 + Lab 2.1
 
 ```
-{student_id}_hw4    # In lowercase
+{student_id}_hw5    # In lowercase
 ├── lab1_output
 |   ├── ner__in-context_learning__en__2023_Hawaii_wildfires.txt
 |   ├── ner__in-context_learning__en__Russo-Ukrainian_War.txt
@@ -191,11 +209,11 @@ Finish the game: 10 point.
     └── ...
 
 # Zip it and Summit to NTU COOL
--> {student_id}_hw4.zip
+-> {student_id}_hw5.zip
 ```
 
 ### Lab 2.2. Your own game
-This lab takes a lot of time (at least 10 hours), so you can submit it before 11/23.
+This lab takes a lot of time (at least 10 hours), so you can submit it before 2026/12/13 21:00.
 I believe you can learn a lot from this lab, so I highly recommend you to try it.
 The TA will give you feedback on your game.
 You can have bonus points depending on the quality of your game.
