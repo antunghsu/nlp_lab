@@ -69,6 +69,29 @@ def write_json(file, data, indent=None, write_log=False):
     return
 
 
+def parse_json_bool(text, key):
+    match = re.search(r"\{.*?\}", text, re.DOTALL)
+    if match:
+        try:
+            data = json.loads(match.group(0))
+            value = data.get(key)
+            if isinstance(value, bool):
+                return value
+        except json.JSONDecodeError:
+            pass
+    logger.info(f"Cannot parse [{key}] from LLM output: {text!r}")
+    return None
+
+
+def clean_question(text):
+    text = text.strip()
+    if not text:
+        return ""
+    first_line = text.split("\n")[0].strip()
+    first_line = re.sub(r"^\s*\d+\s*[\.\)、:：]\s*", "", first_line)
+    return first_line
+
+
 class Config:
     def __init__(self, config_file):
         data = read_json(config_file)
@@ -126,13 +149,14 @@ class GPT:
         completion = openai.ChatCompletion.create(
             model=specific_tokens_model,
             n=1,
+            max_tokens=out_tokens,
             messages=[
                 {"role": "user", "content": text_in},
             ]
         )
 
         text_out = completion.choices[0].message.content
-        return text_out
+        return text_out.strip()
 
 
 class State:
@@ -433,17 +457,16 @@ class Game:
 
         # get new question
         if qa_list:
-            question_list_text = "問題列表：\n"
-            for i, (question, answer) in enumerate(qa_list):
-                question_list_text += f"{i + 1}. {question}\n"
-
-            questions = len(qa_list) + 1
-            question_list_text += f"{questions}. "
-
-            instruction_text = f"問{questions}個可以從以下文章得到答案的問題。只能使用單一句問句。"
-
-            gpt_in = f"{instruction_text}\n\n文章：\n{full_info}\n\n{question_list_text}"
-            use_question = self.gpt.run_gpt(gpt_in, 100)
+            asked_text = "\n".join(f"- {question}" for question, _answer in qa_list)
+            gpt_in = (
+                f"根據以下文章，提出一個新的問題，答案必須能在文章中找到，且不能與「已問過的問題」重複。\n"
+                f"輸出規則：只輸出問題本身，一句問句，不要編號、引號或任何其他文字。\n\n"
+                f"文章：\n{full_info}\n\n"
+                f"已問過的問題：\n{asked_text}"
+            )
+            use_question = clean_question(self.gpt.run_gpt(gpt_in, 100))
+            if not use_question:
+                use_question = f"{name}的棲息地在哪裡？"
 
         else:
             use_question = f"{name}的食物來源包括哪些？"
@@ -457,9 +480,15 @@ class Game:
         self.state.log += f"\n{log}"
 
         # evaluate answer
-        gpt_in = f"參考資料：\n{full_info}\n\n問題：\n{use_question}\n\n答案：\n{use_answer}\n\n請問答案是否正確？請回答「是」或「否」一個字"
-        gpt_out = self.gpt.run_gpt(gpt_in, 10)
-        is_correct = "否" not in gpt_out
+        gpt_in = (
+            f"參考資料：\n{full_info}\n\n"
+            f"問題：\n{use_question}\n\n"
+            f"答案：\n{use_answer}\n\n"
+            f"根據參考資料，判斷答案是否正確。\n"
+            f"只輸出 JSON，格式為 {{\"correct\": true}} 或 {{\"correct\": false}}，不要其他文字。"
+        )
+        gpt_out = self.gpt.run_gpt(gpt_in, 20)
+        is_correct = parse_json_bool(gpt_out, "correct") is True
         old_knowledge = state_pedia["knowledge"]
         if is_correct:
             new_knowledge = old_knowledge + 5
@@ -515,20 +544,31 @@ class Game:
 
         # interact
         use_interact = f"努伊特試圖和{teacher}互動：{use_interact}"
-        gpt_in = f"撰寫一個短篇故事，最多使用3句話。\n\n短篇故事：{use_interact}"
+        gpt_in = (
+            f"以下是一個短篇故事的開頭，請接著寫下去，最多使用3句話。\n"
+            f"只輸出接續的內容，不要重複開頭，也不要標題或其他說明。\n\n"
+            f"故事開頭：\n{use_interact}"
+        )
         continuation = self.gpt.run_gpt(gpt_in, 200)
 
         # revise
-        gpt_in = \
-            f"將短篇故事改寫的較為合理且通順，最多使用3句話，不能使用「試圖」，必須包含「努伊特」和「{teacher}」。\n\n" \
-            f"短篇故事：\n{use_interact}，{continuation}\n\n" \
-            f"合理且通順的改編故事：\n"
+        gpt_in = (
+            f"將以下短篇故事改寫得較為合理且通順。\n"
+            f"規則：最多使用3句話；不能使用「試圖」；必須包含「努伊特」和「{teacher}」；"
+            f"只輸出改寫後的故事，不要標題或其他說明。\n\n"
+            f"短篇故事：\n{use_interact}，{continuation}"
+        )
         story = self.gpt.run_gpt(gpt_in, 200)
 
         # score
-        gpt_in = f"故事：\n{story}\n\n這是個溫馨的故事嗎？請回答「是」或「否」一個字"
-        feedback = self.gpt.run_gpt(gpt_in, 10)
-        if "否" in feedback:
+        gpt_in = (
+            f"故事：\n{story}\n\n"
+            f"判斷這是不是一個溫馨的故事。\n"
+            f"只輸出 JSON，格式為 {{\"warm\": true}} 或 {{\"warm\": false}}，不要其他文字。"
+        )
+        feedback = self.gpt.run_gpt(gpt_in, 20)
+        is_warm = parse_json_bool(feedback, "warm") is True
+        if not is_warm:
             score = random.randrange(-1, 5)
         else:
             score = 5
@@ -582,10 +622,10 @@ class Game:
         # get story summary
         story = self.state.log
         story = re.sub(r"\n+", "\n", story).strip()
-        instruction = "將這個長篇故事精簡為一個短篇故事。使用至少20句話。其中不能出現「10」"
+        instruction = "將這個長篇故事精簡為一個短篇故事。使用至少20句話。其中不能出現「10」。只輸出故事本身，不要標題或其他說明。"
         while True:
             gpt_in = f"{story}\n\n{instruction}"
-            summary = self.gpt4.run_gpt(gpt_in, 1000)
+            summary = self.gpt4.run_gpt(gpt_in, 2000)
             if summary:
                 break
             story = story[:-100]
@@ -593,10 +633,10 @@ class Game:
         summary = re.sub(r"\n+", "\n", summary).strip()
 
         # revise summary
-        instruction = "根據事實，將故事修正為一個符合事實的短文。使用至少20句話。其中不能出現「10」"
+        instruction = "根據事實，將故事修正為一個符合事實的短文。使用至少20句話。其中不能出現「10」。只輸出修正後的短文，不要標題或其他說明。"
         while True:
             gpt_in = f"事實：\n{story}\n\n故事：\n{summary}\n\n{instruction}"
-            revision = self.gpt4.run_gpt(gpt_in, 1000)
+            revision = self.gpt4.run_gpt(gpt_in, 2000)
             if revision:
                 break
             story = story[:-100]
