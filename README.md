@@ -37,9 +37,12 @@ Authors:
   - OS-independent
 - System apps
   - [Anaconda](https://www.anaconda.com/download) or [Miniconda](https://docs.anaconda.com/miniconda/)
-  - Python 3.9 (created by conda below)
+  - Python 3.11 (created by conda below)
 - Python packages
   - See *requirements.txt*
+  - This homework uses the legacy `openai==0.28.1` SDK. **Do not upgrade the `openai` package** (e.g. `pip install -U openai`), or the code will break.
+
+> Windows users: run the commands below in **Anaconda Prompt** (Start menu → Anaconda Prompt), not the default Command Prompt or PowerShell, otherwise `conda` may not be found.
 
 ```bash
 # move to your working directory
@@ -49,17 +52,17 @@ cd /path/to/your/working/directory
 git clone https://github.com/antunghsu/nlp_lab
 cd nlp_lab
 
-# Create and activate a conda environment with Python 3.9
-conda create -n nlp_lab python=3.9
+# Create and activate a conda environment with Python 3.11
+conda create -n nlp_lab python=3.11
 conda activate nlp_lab
 
-# To check python version (should be 3.9.x)
+# To check python version (should be 3.11.x)
 python --version
 
-# Install the required packages with PyPI, or
+# Install the required packages with PyPI (recommended), or
 pip install -r requirements.txt
-# Install with Conda
-conda install --file requirements.txt
+# Install with Conda (from the conda-forge channel)
+conda install -c conda-forge --file requirements.txt
 ```
 
 
@@ -91,7 +94,7 @@ Prompting Large Language Models (LLM) to solve Natural Language Processing (NLP)
 #### Step 3. [Create your OpenAI API Key](https://platform.openai.com/account/api-keys/)
 
 It is a string that looks like "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx".
-If you have already fill the google form, you should be able to see your orginiztion: "Intro of AI".
+If you have already filled in the Google form, you should be able to see your organization: "Intro of AI".
 We already fund the API for you, so you don't need to pay for it. But please don't abuse it.
 
 > Note: Please remember to keep your API key. It only shows once. And do not share it with others.
@@ -102,7 +105,7 @@ Modify it as you wish.
 
 #### Step 5. Run *lab1_nlp_tasks.py*
 
-For example, using linux command line, run
+For example, in your terminal (Anaconda Prompt on Windows) with the `nlp_lab` environment activated, run
 ```bash
 python lab1_nlp_tasks.py
 ```
@@ -130,7 +133,7 @@ The results may vary for each different runs.
 
 #### Objectives
 
-Solve all tasks (NER, REL, SUM) in both languanges (English, Chinese) with both prompting methods (instruction prompting, in-context learning).
+Solve all tasks (NER, REL, SUM) in both languages (English, Chinese) with both prompting methods (instruction prompting, in-context learning).
 > The English prompts is already there; you only need to get output results. And create your own Chinese prompts.
 > If you have question about Chinese prompts, please contact TA.
 
@@ -147,12 +150,12 @@ Solve tasks beyond NER, REL, SUM
 - For at least 2 tasks, For inspiration:
   - [CKIP CoreNLP](https://ckip.iis.sinica.edu.tw/service/corenlp/)
   - [Stanford CoreNLP](https://corenlp.run/)
-  - [Papers With Code - NLP](https://paperswithcode.com/area/natural-language-processing/)
+  - [Hugging Face Tasks](https://huggingface.co/tasks)
   - [LDC Catalog](https://catalog.ldc.upenn.edu/)
 - In at least 2 languages
   - One of them must be English
   - The other may be Chinese or another language
-- You can use use other news materials, add them in corresponding folders, and don't need to provide them in your submission.
+- You can use other news materials, add them in corresponding folders, and don't need to provide them in your submission.
 
 #### Scoring
 One task in one language: 10 point.
@@ -208,7 +211,7 @@ Finish the game: 10 point.
     ├── summary_1.txt
     └── ...
 
-# Zip it and Summit to NTU COOL
+# Zip it and submit to NTU COOL
 -> {student_id}_hw5.zip
 ```
 
@@ -247,7 +250,7 @@ Please submit your assignment on NTU COOL by providing a link to your GitHub rep
 
 Copyright © 2023 [Li Peng-Hsuan 李朋軒](https://jacobvsdanniel.github.io) Lai Hong-Sheng 賴鴻昇
 
-Modified in 2026 by the course TA: updated the default model to `gpt-4o-mini` (`gpt-3.5-turbo` / `gpt-4` replaced), updated `tiktoken` to 0.7.0, and switched environment setup to conda. Original repository: <https://github.com/wkh1267/nlp_lab>.
+Modified in 2026 by the course TA: updated the default model to `gpt-4o-mini` (`gpt-3.5-turbo` / `gpt-4` replaced), updated `tiktoken` to 0.7.0, and switched environment setup to conda with Python 3.11. Original repository: <https://github.com/wkh1267/nlp_lab>.
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
