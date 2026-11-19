@@ -463,21 +463,18 @@ class Game:
             state_pedia["qa_list"] = []
         qa_list = state_pedia["qa_list"]
 
-        # get new question
+        # get new question (always generated from the article, so the answer is guaranteed to exist in it)
+        gpt_in = (
+            f"根據以下文章，提出一個問題，答案必須能在文章中明確找到。\n"
+            f"輸出規則：只輸出問題本身，一句問句，不要編號、引號或任何其他文字。\n\n"
+            f"文章：\n{full_info}"
+        )
         if qa_list:
             asked_text = "\n".join(f"- {question}" for question, _answer in qa_list)
-            gpt_in = (
-                f"根據以下文章，提出一個新的問題，答案必須能在文章中找到，且不能與「已問過的問題」重複。\n"
-                f"輸出規則：只輸出問題本身，一句問句，不要編號、引號或任何其他文字。\n\n"
-                f"文章：\n{full_info}\n\n"
-                f"已問過的問題：\n{asked_text}"
-            )
-            use_question = clean_question(self.gpt.run_gpt(gpt_in, 100))
-            if not use_question:
-                use_question = f"{name}的棲息地在哪裡？"
-
-        else:
-            use_question = f"{name}的食物來源包括哪些？"
+            gpt_in += f"\n\n不能與以下「已問過的問題」重複：\n{asked_text}"
+        use_question = clean_question(self.gpt.run_gpt(gpt_in, 100))
+        if not use_question:
+            use_question = f"{name}分佈在哪些地區？"
 
         # get answer
         log = f"{name}詢問努伊特：「{use_question}」"
@@ -492,7 +489,10 @@ class Game:
             f"參考資料：\n{full_info}\n\n"
             f"問題：\n{use_question}\n\n"
             f"答案：\n{use_answer}\n\n"
-            f"根據參考資料，判斷答案是否正確。\n"
+            f"判斷答案是否可接受。評分原則：\n"
+            f"- 答案與參考資料一致即算正確，用詞不同、同義改寫、只答出部分重點也可接受。\n"
+            f"- 參考資料沒有明寫、但屬於合理推論或常識補充，且不與參考資料矛盾，也算正確。\n"
+            f"- 只有在答案明顯錯誤、與參考資料矛盾，或答非所問時才算錯誤。\n"
             f"只輸出 JSON，格式為 {{\"correct\": true}} 或 {{\"correct\": false}}，不要其他文字。"
         )
         gpt_out = self.gpt.run_gpt(gpt_in, 100)
