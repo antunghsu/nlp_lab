@@ -122,6 +122,9 @@ class GPT:
             "gpt-4o-mini": {
                 "gpt-4o-mini": 128000,
             },
+            "gpt-5-nano": {
+                "gpt-5-nano": 400000,
+            },
         }
         return
 
@@ -146,16 +149,21 @@ class GPT:
         # logger.info(text_in)
         logger.info("I'm alive! Please wait awhile >< ...")
 
+        extra_args = {}
+        if specific_tokens_model.startswith("gpt-5"):
+            extra_args["reasoning_effort"] = "minimal"
+
         completion = openai.ChatCompletion.create(
             model=specific_tokens_model,
             n=1,
-            max_tokens=out_tokens,
+            max_completion_tokens=out_tokens,
             messages=[
                 {"role": "user", "content": text_in},
-            ]
+            ],
+            **extra_args,
         )
 
-        text_out = completion.choices[0].message.content
+        text_out = completion.choices[0].message.content or ""
         return text_out.strip()
 
 
@@ -487,7 +495,7 @@ class Game:
             f"根據參考資料，判斷答案是否正確。\n"
             f"只輸出 JSON，格式為 {{\"correct\": true}} 或 {{\"correct\": false}}，不要其他文字。"
         )
-        gpt_out = self.gpt.run_gpt(gpt_in, 20)
+        gpt_out = self.gpt.run_gpt(gpt_in, 100)
         is_correct = parse_json_bool(gpt_out, "correct") is True
         old_knowledge = state_pedia["knowledge"]
         if is_correct:
@@ -566,7 +574,7 @@ class Game:
             f"判斷這是不是一個溫馨的故事。\n"
             f"只輸出 JSON，格式為 {{\"warm\": true}} 或 {{\"warm\": false}}，不要其他文字。"
         )
-        feedback = self.gpt.run_gpt(gpt_in, 20)
+        feedback = self.gpt.run_gpt(gpt_in, 100)
         is_warm = parse_json_bool(feedback, "warm") is True
         if not is_warm:
             score = random.randrange(-1, 5)
@@ -623,23 +631,29 @@ class Game:
         story = self.state.log
         story = re.sub(r"\n+", "\n", story).strip()
         instruction = "將這個長篇故事精簡為一個短篇故事。使用至少20句話。其中不能出現「10」。只輸出故事本身，不要標題或其他說明。"
-        while True:
+        summary = ""
+        for _ in range(3):
             gpt_in = f"{story}\n\n{instruction}"
             summary = self.gpt4.run_gpt(gpt_in, 2000)
             if summary:
                 break
             story = story[:-100]
+        if not summary:
+            summary = story
 
         summary = re.sub(r"\n+", "\n", summary).strip()
 
         # revise summary
         instruction = "根據事實，將故事修正為一個符合事實的短文。使用至少20句話。其中不能出現「10」。只輸出修正後的短文，不要標題或其他說明。"
-        while True:
+        revision = ""
+        for _ in range(3):
             gpt_in = f"事實：\n{story}\n\n故事：\n{summary}\n\n{instruction}"
             revision = self.gpt4.run_gpt(gpt_in, 2000)
             if revision:
                 break
             story = story[:-100]
+        if not revision:
+            revision = summary
 
         write_txt(self.summary_file, revision)
         user_prompt = f"\n\n努伊特的旅程：\n{revision}\n\n(按換行繼續)... "

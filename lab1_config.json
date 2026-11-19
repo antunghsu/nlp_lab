@@ -2,7 +2,7 @@
     "task_list": ["ner", "rel", "sum"],
     "prompt_method_list": ["instruction", "in-context_learning"],
     "language_list": ["en", "zh"],
-    "model": "gpt-4o-mini",
+    "model": "gpt-5-nano",
     "news_dir": ["corpora", "news"],
     "prompt_dir": ["corpora", "prompt"],
     "output_dir": ["lab1_output"]

@@ -117,6 +117,9 @@ def get_specific_tokens_model(model, text_in, tokenizer, out_tokens=500):
         "gpt-4o-mini": {
             "gpt-4o-mini": 128000,
         },
+        "gpt-5-nano": {
+            "gpt-5-nano": 400000,
+        },
     }
 
     in_token_list = tokenizer.encode(text_in)
@@ -139,13 +142,18 @@ def run_gpt(model, tokenizer, text_in, log_prefix):
         logger.info(f"[{log_prefix}] too many tokens, return empty result")
         return ""
 
+    extra_args = {}
+    if specific_tokens_model.startswith("gpt-5"):
+        extra_args["reasoning_effort"] = "minimal"
+
     logger.info(f"[{log_prefix}]: prompting {specific_tokens_model} with {in_tokens} tokens...")
     completion = openai.ChatCompletion.create(
         model=specific_tokens_model,
         n=1,
         messages=[
             {"role": "user", "content": text_in},
-        ]
+        ],
+        **extra_args,
     )
     logger.info(f"[{log_prefix}]: received result")
     text_out = completion.choices[0].message.content
