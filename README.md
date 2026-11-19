@@ -6,7 +6,7 @@
 
 - Release date: 2026/11/19
 - Due date: 2026/12/01 21:00
-  - Note: Lab 2.2 has a different due date: **2026/12/13 21:00**
+  - Note: Lab 2.2 has a different due date: **2026/12/08 21:00**
 
 In this assignment, we hope that you will become familiar with prompts and be able to utilize the API of a Large Language Model to solve Natural Language Processing tasks.
 
